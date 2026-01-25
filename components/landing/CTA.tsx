@@ -1,15 +1,25 @@
 export default function CTA() {
   return (
-    <section className="py-20 bg-orange-600 text-white text-center px-6">
-      <h2 className="text-3xl font-semibold">
-        Get Your Authentic Rudraksha
-      </h2>
-      <p className="mt-4 text-orange-100">
-        Trusted by devotees and spiritual seekers.
-      </p>
-      <button className="mt-6 px-8 py-3 bg-white text-orange-700 rounded-full font-medium hover:bg-orange-100">
-        Contact Us
-      </button>
+    <section id="contact" className="py-24 px-6" style={{ backgroundColor: '#8B4513' }}>
+      <div className="max-w-4xl mx-auto text-center space-y-8">
+        <h2 className="text-4xl md:text-5xl font-bold text-white">
+          Start Your Spiritual Journey
+        </h2>
+        <p className="text-xl max-w-2xl mx-auto" style={{ color: '#FFE8C7' }}>
+          Discover authentic Rudraksha beads and unlock ancient wisdom
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+          <button 
+            className="px-10 py-4 rounded-lg font-bold text-lg transition-all hover:scale-105" 
+            style={{ backgroundColor: '#FFB257', color: '#2C1810' }}
+          >
+            Shop Collection
+          </button>
+          <button className="px-10 py-4 border-2 border-white text-white rounded-lg font-bold text-lg hover:bg-white/10 transition-all">
+            Get Free Guide
+          </button>
+        </div>
+      </div>
     </section>
   );
 }

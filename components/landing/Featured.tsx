@@ -1,28 +1,47 @@
-const items = [
-  { name: "5 Mukhi Rudraksha", price: "₹1,200" },
-  { name: "7 Mukhi Rudraksha", price: "₹3,500" },
-  { name: "1 Mukhi Rudraksha", price: "₹45,000" },
-];
+import { Droplets } from 'lucide-react';
 
 export default function Featured() {
-  return (
-    <section className="py-20 px-6 max-w-6xl mx-auto">
-      <h2 className="text-3xl font-semibold text-center text-orange-700">
-        Featured Rudraksha
-      </h2>
+  const collections = [
+    { name: '1 Mukhi', price: '$45', desc: 'Power & manifestation' },
+    { name: '5 Mukhi', price: '$15', desc: 'Health & protection' },
+    { name: '7 Mukhi', price: '$25', desc: 'Wealth & prosperity' },
+    { name: '11 Mukhi', price: '$35', desc: 'Spiritual growth' }
+  ];
 
-      <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
-        {items.map((item, index) => (
-          <div
-            key={index}
-            className="border rounded-xl p-6 text-center hover:shadow-md"
-          >
-            <h3 className="text-xl font-medium">{item.name}</h3>
-            <p className="mt-2 text-orange-600 font-semibold">
-              {item.price}
-            </p>
-          </div>
-        ))}
+  return (
+    <section className="py-24 px-6" style={{ backgroundColor: '#FFFFFF' }}>
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: '#2C1810' }}>
+            Featured Collections
+          </h2>
+          <p className="text-xl" style={{ color: '#4A3728' }}>
+            Premium quality Rudraksha for every spiritual practice
+          </p>
+        </div>
+        
+        <div className="grid md:grid-cols-4 gap-6">
+          {collections.map((item, i) => (
+            <div 
+              key={i} 
+              className="rounded-xl p-6 text-center transition-all hover:shadow-lg" 
+              style={{ backgroundColor: '#FFE8C7' }}
+            >
+              <div className="mb-4">
+                <Droplets className="w-12 h-12 mx-auto" style={{ color: '#8B4513' }} />
+              </div>
+              <h3 className="text-2xl font-bold mb-2" style={{ color: '#2C1810' }}>
+                {item.name}
+              </h3>
+              <p className="mb-4 text-sm" style={{ color: '#4A3728' }}>
+                {item.desc}
+              </p>
+              <p className="text-3xl font-bold" style={{ color: '#8B4513' }}>
+                {item.price}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
