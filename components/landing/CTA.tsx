@@ -15,9 +15,6 @@ export default function CTA() {
           >
             Shop Collection
           </button>
-          <button className="px-10 py-4 border-2 border-white text-white rounded-lg font-bold text-lg hover:bg-white/10 transition-all">
-            Get Free Guide
-          </button>
         </div>
       </div>
     </section>
