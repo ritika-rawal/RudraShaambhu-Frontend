@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Hero() {
   return (
@@ -13,12 +14,14 @@ export default function Hero() {
             <p className="text-lg leading-relaxed" style={{ color: '#2C1810' }}>
               We believe spiritual tools should be chosen with care, not impulse. That's why every Rudraksha Rudra Shambhu offer is guided, verified, and handled with intention.
             </p>
-            <button
-              className="px-8 py-4 rounded-lg font-semibold text-lg transition-all hover:scale-105"
-              style={{ backgroundColor: '#FFB257', color: '#2C1810' }}
-            >
-              Explore More
-            </button>
+            <Link href="/explore">
+              <button
+                className="px-8 py-4 rounded-lg font-semibold text-lg transition-all hover:scale-105 active:scale-95"
+                style={{ backgroundColor: '#FFB257', color: '#2C1810' }}
+              >
+                Explore More
+              </button>
+            </Link>
           </div>
 
           {/* Right Image */}

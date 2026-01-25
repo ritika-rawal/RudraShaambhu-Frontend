@@ -22,7 +22,7 @@ export default function LandingPage() {
               <div className="w-20 h-20 rounded-full flex items-center justify-center overflow-hidden">
                 <Image
                   src="/Logo.png"
-                  alt="Rudra Shambhu Logo"
+                  alt="Rudra Shaambhu Logo"
                   width={90}
                   height={90}
                   className="object-contain"
