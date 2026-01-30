@@ -40,16 +40,45 @@ export default function Header({ showBack = false, title = 'Rudra Shaambhu' }: H
 
           {!showBack && (
             <div className="hidden md:flex gap-8 items-center">
-              {['Home', 'Rudraksha', 'Benefits', 'About Us', 'Contact'].map((item) => (
-                <a 
-                  key={item}
-                  href={`#${item.toLowerCase().replace(' ', '')}`} 
-                  className="text-base font-medium transition-all"
-                  style={{ color: colors.text }}
-                >
-                  {item}
-                </a>
-              ))}
+              {['Home', 'Rudraksha', 'Benefits', 'About Us', 'Contact'].map((item) => {
+                if (item === 'Home') {
+                  return (
+                    <Link key={item} href="/landing#home" className="text-base font-medium transition-all" style={{ color: colors.text }}>
+                      {item}
+                    </Link>
+                  );
+                }
+
+                if (item === 'Rudraksha') {
+                  return (
+                    <Link key={item} href="/rudraksha" className="text-base font-medium transition-all" style={{ color: colors.text }}>
+                      {item}
+                    </Link>
+                  );
+                }
+
+                if (item === 'Benefits') {
+                  return (
+                    <Link key={item} href="/landing#benefits" className="text-base font-medium transition-all" style={{ color: colors.text }}>
+                      {item}
+                    </Link>
+                  );
+                }
+
+                if (item === 'About Us') {
+                  return (
+                    <Link key={item} href="/landing#aboutus" className="text-base font-medium transition-all" style={{ color: colors.text }}>
+                      {item}
+                    </Link>
+                  );
+                }
+
+                return (
+                  <Link key={item} href="/landing#contact" className="text-base font-medium transition-all" style={{ color: colors.text }}>
+                    {item}
+                  </Link>
+                );
+              })}
             </div>
           )}
 
@@ -66,18 +95,47 @@ export default function Header({ showBack = false, title = 'Rudra Shaambhu' }: H
       </div>
 
       {!showBack && mobileMenuOpen && (
-        <div className="md:hidden border-t" style={{ backgroundColor: colors.primary, borderColor: colors.accent }}>
-          <div className="px-6 py-4 space-y-3">
-            {['Home', 'Benefits', 'About Us', 'Contact'].map((item) => (
-              <a 
-                key={item}
-                href={`#${item.toLowerCase().replace(' ', '')}`} 
-                className="block font-medium"
-                style={{ color: colors.text }}
-              >
-                {item}
-              </a>
-            ))}
+        <div className="md:hidden border-t absolute left-0 w-full top-20" style={{ backgroundColor: colors.primary, borderColor: colors.accent }}>
+          <div className="px-6 py-4 space-y-3 pt-2">
+            {['Home', 'Rudraksha', 'Benefits', 'About Us', 'Contact'].map((item) => {
+              if (item === 'Home') {
+                return (
+                  <Link key={item} href="/landing#home" className="block font-medium" style={{ color: colors.text }}>
+                    {item}
+                  </Link>
+                );
+              }
+
+              if (item === 'Rudraksha') {
+                return (
+                  <Link key={item} href="/rudraksha" className="block font-medium" style={{ color: colors.text }}>
+                    {item}
+                  </Link>
+                );
+              }
+
+              if (item === 'Benefits') {
+                return (
+                  <Link key={item} href="/landing#benefits" className="block font-medium" style={{ color: colors.text }}>
+                    {item}
+                  </Link>
+                );
+              }
+
+              if (item === 'About Us') {
+                return (
+                  <Link key={item} href="/landing#aboutus" className="block font-medium" style={{ color: colors.text }}>
+                    {item}
+                  </Link>
+                );
+              }
+
+              return (
+                <Link key={item} href="/landing#contact" className="block font-medium" style={{ color: colors.text }}>
+                  {item}
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}

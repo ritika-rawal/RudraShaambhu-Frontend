@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from 'react';
+import { SetStateAction, useState } from 'react';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
 import colors from '@/theme/colors';
 
 export default function RudrakshRecommendationPage() {
-  const [activeWidget, setActiveWidget] = useState(null);
+  const [activeWidget, setActiveWidget] = useState<string | null>(null);
   const [formData, setFormData] = useState({ date: '', name: '' });
   const [result, setResult] = useState(null);
 
@@ -37,20 +37,20 @@ export default function RudrakshRecommendationPage() {
     9: { name: '9 Mukhi', price: 32, benefits: ['Emotional Balance', 'Intuition', 'Peace'] }
   };
 
-  const getZodiac = (month, date) => {
+  const getZodiac = (month: string, date: string) => {
     const signs = ['capricorn', 'aquarius', 'pisces', 'aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius'];
     const daysInMonth = [20, 19, 20, 20, 21, 21, 23, 23, 23, 23, 22, 22];
     if (date < daysInMonth[month - 1]) return signs[month - 1];
     return signs[month % 12];
   };
 
-  const calculateBhagyank = (date) => {
+  const calculateBhagyank = (date: string) => {
     let sum = parseInt(date);
     while (sum > 9) sum = Math.floor(sum / 10) + (sum % 10);
     return sum;
   };
 
-  const calculateNameNumerology = (text) => {
+  const calculateNameNumerology = (text: string) => {
     const map = { a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8, i: 9, j: 1, k: 2, l: 3, m: 4, n: 5, o: 6, p: 7, q: 8, r: 9, s: 1, t: 2, u: 3, v: 4, w: 5, x: 6, y: 7, z: 8 };
     let sum = 0;
     text.toLowerCase().split('').forEach(char => { if (map[char]) sum += map[char]; });
@@ -58,12 +58,12 @@ export default function RudrakshRecommendationPage() {
     return sum;
   };
 
-  const handleWidgetClick = (type) => {
+  const handleWidgetClick = (type: string) => {
     setActiveWidget(type);
     setResult(null);
   };
 
-  const handleGetRecommendation = (type) => {
+  const handleGetRecommendation = (type: string) => {
     if (type === 'horoscope' && !formData.date) {
       alert('Please enter your birth date');
       return;
@@ -98,12 +98,12 @@ export default function RudrakshRecommendationPage() {
 
   return (
     <div className="min-h-screen" style={{ background: `linear-gradient(135deg, #FFF9F0 0%, ${colors.primary} 100%)` }}>
-      <Header showBack title="Rudra Shaambhu" />
+      <Header />
 
       {/* Hero Section */}
       <section className="pt-32 pb-16 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: colors.text }}>
+          <h2 className="text-2xl md:text-2xl font-bold mb-6" style={{ color: colors.text }}>
             Find Your Rudraksha
           </h2>
           <p className="text-lg md:text-xl max-w-3xl mx-auto" style={{ color: colors.border }}>
@@ -262,7 +262,7 @@ export default function RudrakshRecommendationPage() {
         </div>
       )}
 
-      <Footer variant="simple" />
+      <Footer  />
     </div>
   );
 }
