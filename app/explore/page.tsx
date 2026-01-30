@@ -1,459 +1,268 @@
 "use client";
 
 import { useState } from 'react';
-import { Menu, X, Heart, Star, Zap, Leaf, ShoppingCart, ArrowLeft, Filter } from 'lucide-react';
-import Link from 'next/link';
+import Header from '@/components/common/Header';
+import Footer from '@/components/common/Footer';
+import colors from '@/theme/colors';
 
-export default function ExplorePage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [cart, setCart] = useState(0);
-  const [showFilters, setShowFilters] = useState(false);
+export default function RudrakshRecommendationPage() {
+  const [activeWidget, setActiveWidget] = useState(null);
+  const [formData, setFormData] = useState({ date: '', name: '' });
+  const [result, setResult] = useState(null);
 
-  const products = [
-    {
-      id: 1,
-      name: '1 Mukhi Rudraksha',
-      price: 45,
-      category: 'rare',
-      desc: 'Most powerful - Unity of consciousness',
-      benefits: ['Divine manifestation', 'Supreme consciousness', 'Enlightenment'],
-      rating: 5
-    },
-    {
-      id: 2,
-      name: '5 Mukhi Rudraksha',
-      price: 15,
-      category: 'popular',
-      desc: 'Most common - Balance & peace',
-      benefits: ['Health & vitality', 'Mental peace', 'Protection'],
-      rating: 5
-    },
-    {
-      id: 3,
-      name: '7 Mukhi Rudraksha',
-      price: 25,
-      category: 'popular',
-      desc: 'Lakshmi Rudraksha - Prosperity',
-      benefits: ['Wealth & prosperity', 'Success', 'Good fortune'],
-      rating: 4.8
-    },
-    {
-      id: 4,
-      name: '11 Mukhi Rudraksha',
-      price: 35,
-      category: 'premium',
-      desc: 'Highest spiritual path',
-      benefits: ['Spiritual growth', 'Deep meditation', 'Divine grace'],
-      rating: 4.9
-    },
-    {
-      id: 5,
-      name: '3 Mukhi Rudraksha',
-      price: 20,
-      category: 'popular',
-      desc: 'Agni Rudraksha - Fire energy',
-      benefits: ['Confidence & courage', 'Vitality', 'Inner strength'],
-      rating: 4.7
-    },
-    {
-      id: 6,
-      name: '6 Mukhi Rudraksha',
-      price: 22,
-      category: 'premium',
-      desc: 'Knowledge & learning',
-      benefits: ['Intelligence & wisdom', 'Focus', 'Academic success'],
-      rating: 4.8
-    },
-    {
-      id: 7,
-      name: '8 Mukhi Rudraksha',
-      price: 28,
-      category: 'premium',
-      desc: 'Shiva Rudraksha - Power',
-      benefits: ['Courage & strength', 'Fearlessness', 'Power'],
-      rating: 4.6
-    },
-    {
-      id: 8,
-      name: '12 Mukhi Rudraksha',
-      price: 38,
-      category: 'rare',
-      desc: 'Suryamukhi - Sun energy',
-      benefits: ['Leadership & success', 'Authority', 'Confidence'],
-      rating: 4.9
-    },
-    {
-      id: 9,
-      name: '2 Mukhi Rudraksha',
-      price: 18,
-      category: 'popular',
-      desc: 'Ardhanari - Balance',
-      benefits: ['Relationship harmony', 'Balance', 'Peace'],
-      rating: 4.7
-    },
-    {
-      id: 10,
-      name: '4 Mukhi Rudraksha',
-      price: 19,
-      category: 'popular',
-      desc: 'Brahma Rudraksha - Knowledge',
-      benefits: ['Creativity', 'Communication', 'Expression'],
-      rating: 4.8
-    },
-    {
-      id: 11,
-      name: '9 Mukhi Rudraksha',
-      price: 32,
-      category: 'premium',
-      desc: 'Chandramukhi - Moon energy',
-      benefits: ['Emotional balance', 'Intuition', 'Peace'],
-      rating: 4.8
-    },
-    {
-      id: 12,
-      name: '13 Mukhi Rudraksha',
-      price: 42,
-      category: 'rare',
-      desc: 'Kamdev Rudraksha',
-      benefits: ['Love & attraction', 'Relationships', 'Harmony'],
-      rating: 4.9
+  const horoscopeMap = {
+    'aries': { name: '3 Mukhi', price: 20, benefits: ['Confidence & Courage', 'Vitality', 'Inner Strength'] },
+    'taurus': { name: '5 Mukhi', price: 15, benefits: ['Health & Vitality', 'Mental Peace', 'Protection'] },
+    'gemini': { name: '4 Mukhi', price: 19, benefits: ['Creativity', 'Communication', 'Expression'] },
+    'cancer': { name: '2 Mukhi', price: 18, benefits: ['Relationship Harmony', 'Balance', 'Peace'] },
+    'leo': { name: '12 Mukhi', price: 38, benefits: ['Leadership & Success', 'Authority', 'Confidence'] },
+    'virgo': { name: '6 Mukhi', price: 22, benefits: ['Intelligence & Wisdom', 'Focus', 'Academic Success'] },
+    'libra': { name: '2 Mukhi', price: 18, benefits: ['Balance & Harmony', 'Peace', 'Justice'] },
+    'scorpio': { name: '8 Mukhi', price: 28, benefits: ['Courage & Strength', 'Fearlessness', 'Power'] },
+    'sagittarius': { name: '7 Mukhi', price: 25, benefits: ['Wealth & Prosperity', 'Success', 'Good Fortune'] },
+    'capricorn': { name: '11 Mukhi', price: 35, benefits: ['Spiritual Growth', 'Deep Meditation', 'Divine Grace'] },
+    'aquarius': { name: '9 Mukhi', price: 32, benefits: ['Emotional Balance', 'Intuition', 'Peace'] },
+    'pisces': { name: '13 Mukhi', price: 42, benefits: ['Love & Attraction', 'Relationships', 'Harmony'] }
+  };
+
+  const bhagyankMap = {
+    1: { name: '1 Mukhi', price: 45, benefits: ['Divine Manifestation', 'Supreme Consciousness', 'Enlightenment'] },
+    2: { name: '2 Mukhi', price: 18, benefits: ['Relationship Harmony', 'Balance', 'Peace'] },
+    3: { name: '3 Mukhi', price: 20, benefits: ['Confidence & Courage', 'Vitality', 'Inner Strength'] },
+    4: { name: '4 Mukhi', price: 19, benefits: ['Creativity', 'Communication', 'Expression'] },
+    5: { name: '5 Mukhi', price: 15, benefits: ['Health & Vitality', 'Mental Peace', 'Protection'] },
+    6: { name: '6 Mukhi', price: 22, benefits: ['Intelligence & Wisdom', 'Focus', 'Academic Success'] },
+    7: { name: '7 Mukhi', price: 25, benefits: ['Wealth & Prosperity', 'Success', 'Good Fortune'] },
+    8: { name: '8 Mukhi', price: 28, benefits: ['Courage & Strength', 'Fearlessness', 'Power'] },
+    9: { name: '9 Mukhi', price: 32, benefits: ['Emotional Balance', 'Intuition', 'Peace'] }
+  };
+
+  const getZodiac = (month, date) => {
+    const signs = ['capricorn', 'aquarius', 'pisces', 'aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius'];
+    const daysInMonth = [20, 19, 20, 20, 21, 21, 23, 23, 23, 23, 22, 22];
+    if (date < daysInMonth[month - 1]) return signs[month - 1];
+    return signs[month % 12];
+  };
+
+  const calculateBhagyank = (date) => {
+    let sum = parseInt(date);
+    while (sum > 9) sum = Math.floor(sum / 10) + (sum % 10);
+    return sum;
+  };
+
+  const calculateNameNumerology = (text) => {
+    const map = { a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8, i: 9, j: 1, k: 2, l: 3, m: 4, n: 5, o: 6, p: 7, q: 8, r: 9, s: 1, t: 2, u: 3, v: 4, w: 5, x: 6, y: 7, z: 8 };
+    let sum = 0;
+    text.toLowerCase().split('').forEach(char => { if (map[char]) sum += map[char]; });
+    while (sum > 9) sum = Math.floor(sum / 10) + (sum % 10);
+    return sum;
+  };
+
+  const handleWidgetClick = (type) => {
+    setActiveWidget(type);
+    setResult(null);
+  };
+
+  const handleGetRecommendation = (type) => {
+    if (type === 'horoscope' && !formData.date) {
+      alert('Please enter your birth date');
+      return;
     }
-  ];
+    if (type === 'name' && !formData.name) {
+      alert('Please enter your name');
+      return;
+    }
 
-  const categories = [
-    { id: 'all', label: 'All Products', icon: Leaf, count: products.length },
-    { id: 'popular', label: 'Popular', icon: Star, count: products.filter(p => p.category === 'popular').length },
-    { id: 'premium', label: 'Premium', icon: Zap, count: products.filter(p => p.category === 'premium').length },
-    { id: 'rare', label: 'Rare & Exclusive', icon: Heart, count: products.filter(p => p.category === 'rare').length }
-  ];
+    let recommendation;
+    if (type === 'horoscope') {
+      const [year, month, date] = formData.date.split('-');
+      const zodiac = getZodiac(month, date);
+      recommendation = { ...horoscopeMap[zodiac], type: 'Horoscope', label: zodiac.charAt(0).toUpperCase() + zodiac.slice(1) };
+    } else if (type === 'bhagyank') {
+      const [year, month, date] = formData.date.split('-');
+      const bhagyank = calculateBhagyank(date);
+      recommendation = { ...bhagyankMap[bhagyank], type: 'Bhagyank', label: `Lucky Number ${bhagyank}` };
+    } else {
+      const nameNum = calculateNameNumerology(formData.name);
+      recommendation = { ...bhagyankMap[nameNum], type: 'Name Numerology', label: `Numerology ${nameNum}` };
+    }
 
-  const filteredProducts = selectedCategory === 'all' 
-    ? products 
-    : products.filter(p => p.category === selectedCategory);
+    setResult(recommendation);
+  };
 
-  const addToCart = (productName) => {
-    setCart(cart + 1);
-    // You can add a toast notification here
+  const handleClose = () => {
+    setActiveWidget(null);
+    setResult(null);
+    setFormData({ date: '', name: '' });
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #FFF9F0 0%, #FFE8C7 100%)' }}>
-      {/* Navigation */}
-      <nav className="fixed w-full shadow-lg z-50" style={{ backgroundColor: '#FFE8C7' }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            <Link href="/landing" className="flex items-center gap-2 hover:opacity-80 transition group">
-              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition" style={{ color: '#2C1810' }} />
-              <span className="text-xl font-bold hidden sm:inline" style={{ color: '#2C1810' }}>
-                Rudra Shaambhu
-              </span>
-            </Link>
-            
-            <div className="hidden md:flex gap-8 items-center">
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`font-medium transition-all px-4 py-2 rounded-lg flex items-center gap-2`}
-                  style={{
-                    color: selectedCategory === cat.id ? '#FFFFFF' : '#2C1810',
-                    backgroundColor: selectedCategory === cat.id ? '#8B4513' : 'transparent'
-                  }}
-                >
-                  <cat.icon className="w-4 h-4" />
-                  <span>{cat.label}</span>
-                  <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
-                    {categories.find(c => c.id === selectedCategory)?.id === cat.id 
-                      ? filteredProducts.length 
-                      : cat.count}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div 
-                className="relative p-3 rounded-full cursor-pointer transition-all hover:scale-110"
-                style={{ backgroundColor: '#FFD8A8' }}
-              >
-                <ShoppingCart className="w-6 h-6" style={{ color: '#2C1810' }} />
-                {cart > 0 && (
-                  <span 
-                    className="absolute -top-2 -right-2 w-6 h-6 rounded-full text-white text-xs font-bold flex items-center justify-center animate-bounce"
-                    style={{ backgroundColor: '#8B4513' }}
-                  >
-                    {cart}
-                  </span>
-                )}
-              </div>
-              
-              <button 
-                className="md:hidden p-2"
-                style={{ color: '#2C1810' }}
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t" style={{ backgroundColor: '#FFE8C7', borderColor: '#FFD8A8' }}>
-            <div className="px-6 py-4 space-y-3">
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => {
-                    setSelectedCategory(cat.id);
-                    setMobileMenuOpen(false);
-                  }}
-                  className="block w-full text-left font-medium p-3 rounded-lg transition-all"
-                  style={{ 
-                    color: selectedCategory === cat.id ? '#FFFFFF' : '#2C1810',
-                    backgroundColor: selectedCategory === cat.id ? '#8B4513' : '#FFD8A8'
-                  }}
-                >
-                  {cat.label} ({cat.count})
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </nav>
+    <div className="min-h-screen" style={{ background: `linear-gradient(135deg, #FFF9F0 0%, ${colors.primary} 100%)` }}>
+      <Header showBack title="Rudra Shaambhu" />
 
       {/* Hero Section */}
       <section className="pt-32 pb-16 px-6">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: '#2C1810' }}>
-            Explore Sacred Rudraksha
-          </h1>
-          <p className="text-lg md:text-xl max-w-3xl mx-auto" style={{ color: '#4A3728' }}>
-            Discover our authentic collection of Rudraksha beads, each with unique spiritual properties. 
-            From the rarest single-faced beads to popular protection beads.
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: colors.text }}>
+            Find Your Rudraksha
+          </h2>
+          <p className="text-lg md:text-xl max-w-3xl mx-auto" style={{ color: colors.border }}>
+            Choose one of three ways to discover your perfect Rudraksha based on your horoscope, lucky number, or name.
           </p>
-          <div className="mt-8 flex justify-center gap-4">
-            <div className="px-6 py-3 rounded-lg" style={{ backgroundColor: '#FFD8A8', color: '#2C1810' }}>
-              <p className="text-sm">📦 <span className="font-semibold">{products.length}</span> Products</p>
-            </div>
-            <div className="px-6 py-3 rounded-lg" style={{ backgroundColor: '#FFD8A8', color: '#2C1810' }}>
-              <p className="text-sm">⭐ <span className="font-semibold">4.8+</span> Avg Rating</p>
-            </div>
-            <div className="px-6 py-3 rounded-lg" style={{ backgroundColor: '#FFD8A8', color: '#2C1810' }}>
-              <p className="text-sm">🌍 <span className="font-semibold">100%</span> Authentic</p>
-            </div>
+        </div>
+      </section>
+
+      {/* 3 Widgets */}
+      <section className="py-16 px-6">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
+          {/* Widget 1: Horoscope */}
+          <div
+            onClick={() => handleWidgetClick('horoscope')}
+            className="rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer text-center"
+            style={{ backgroundColor: '#FFFFFF', border: `3px solid ${colors.accent}` }}
+          >
+            <div className="text-5xl mb-4">🌙</div>
+            <h3 className="text-2xl font-bold mb-3" style={{ color: colors.text }}>
+              By Your Horoscope
+            </h3>
+            <p style={{ color: colors.border }}>
+              Enter your birth date to find your zodiac sign's perfect Rudraksha
+            </p>
+          </div>
+
+          {/* Widget 2: Bhagyank */}
+          <div
+            onClick={() => handleWidgetClick('bhagyank')}
+            className="rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer text-center"
+            style={{ backgroundColor: '#FFFFFF', border: `3px solid ${colors.accent}` }}
+          >
+            <div className="text-5xl mb-4">🔢</div>
+            <h3 className="text-2xl font-bold mb-3" style={{ color: colors.text }}>
+              By Your Bhagyank
+            </h3>
+            <p style={{ color: colors.border }}>
+              Your birth date reveals your lucky number and its Rudraksha
+            </p>
+          </div>
+
+          {/* Widget 3: Name */}
+          <div
+            onClick={() => handleWidgetClick('name')}
+            className="rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer text-center"
+            style={{ backgroundColor: '#FFFFFF', border: `3px solid ${colors.accent}` }}
+          >
+            <div className="text-5xl mb-4">✍️</div>
+            <h3 className="text-2xl font-bold mb-3" style={{ color: colors.text }}>
+              By Your Name
+            </h3>
+            <p style={{ color: colors.border }}>
+              Your name's numerology reveals your perfect Rudraksha match
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Products Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Mobile Category Filter */}
-          <div className="md:hidden mb-8">
-            <button 
-              onClick={() => setShowFilters(!showFilters)}
-              className="w-full flex items-center justify-center gap-2 p-3 rounded-lg font-semibold"
-              style={{ backgroundColor: '#8B4513', color: '#FFFFFF' }}
-            >
-              <Filter className="w-5 h-5" />
-              Filter by Category
-            </button>
-            
-            {showFilters && (
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => {
-                      setSelectedCategory(cat.id);
-                      setShowFilters(false);
-                    }}
-                    className="p-3 rounded-lg font-medium transition-all"
-                    style={{
-                      color: selectedCategory === cat.id ? '#FFFFFF' : '#2C1810',
-                      backgroundColor: selectedCategory === cat.id ? '#8B4513' : '#FFE8C7'
-                    }}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Products Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <div 
-                key={product.id}
-                className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:scale-105 hover:-translate-y-2"
-                style={{ backgroundColor: '#FFFFFF', border: '2px solid #FFD8A8' }}
+      {/* Modal */}
+      {activeWidget && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-6 z-50">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold" style={{ color: colors.text }}>
+                {activeWidget === 'horoscope' && 'Your Horoscope'}
+                {activeWidget === 'bhagyank' && 'Your Bhagyank'}
+                {activeWidget === 'name' && 'Your Name'}
+              </h3>
+              <button
+                onClick={handleClose}
+                className="text-2xl font-bold"
+                style={{ color: colors.dark }}
               >
-                {/* Product Header with Icon */}
-                <div 
-                  className="h-32 flex items-center justify-center text-6xl font-bold transition-transform hover:scale-125"
-                  style={{ backgroundColor: 'linear-gradient(135deg, #FFE8C7 0%, #FFD8A8 100%)' }}
-                >
-                  {['🔱', '🌙', '✨', '💎', '🔥', '📚', '⚡', '☀️', '💫', '🌊', '🦅', '💝'][product.id - 1]}
+                ✕
+              </button>
+            </div>
+
+            {!result ? (
+              <>
+                <div className="space-y-4 mb-6">
+                  {(activeWidget === 'horoscope' || activeWidget === 'bhagyank') && (
+                    <input
+                      type="date"
+                      value={formData.date}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none"
+                      style={{ borderColor: colors.accent, color: colors.text }}
+                    />
+                  )}
+                  {activeWidget === 'name' && (
+                    <input
+                      type="text"
+                      placeholder="Enter your name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none"
+                      style={{ borderColor: colors.accent, color: colors.text }}
+                    />
+                  )}
                 </div>
 
-                <div className="p-6">
-                  {/* Product Name */}
-                  <h3 className="text-lg font-bold mb-2" style={{ color: '#2C1810' }}>
-                    {product.name}
-                  </h3>
-                  
-                  {/* Description */}
-                  <p className="text-sm mb-4 font-medium" style={{ color: '#8B4513' }}>
-                    {product.desc}
+                <button
+                  onClick={() => handleGetRecommendation(activeWidget)}
+                  className="w-full py-3 rounded-lg font-bold text-white transition-all hover:scale-105"
+                  style={{ backgroundColor: colors.dark }}
+                >
+                  Get Recommendation
+                </button>
+              </>
+            ) : (
+              <div className="space-y-6">
+                <div>
+                  <p className="text-sm font-semibold" style={{ color: colors.dark }}>
+                    {result.label}
                   </p>
+                  <h4 className="text-3xl font-bold mt-2" style={{ color: colors.text }}>
+                    {result.name} Rudraksha
+                  </h4>
+                  <p className="text-lg font-semibold mt-2" style={{ color: colors.accent }}>
+                    ${result.price}
+                  </p>
+                </div>
 
-                  {/* Benefits */}
-                  <div className="mb-4 space-y-2">
-                    {product.benefits.map((benefit, i) => (
-                      <div key={i} className="flex items-start gap-2 text-xs" style={{ color: '#4A3728' }}>
-                        <span className="text-lg leading-none">✨</span>
-                        <span className="leading-snug">{benefit}</span>
+                <div>
+                  <p className="font-semibold mb-3" style={{ color: colors.text }}>
+                    Benefits:
+                  </p>
+                  <div className="space-y-2">
+                    {result.benefits.map((benefit, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <span>✨</span>
+                        <span style={{ color: colors.border }}>{benefit}</span>
                       </div>
                     ))}
                   </div>
+                </div>
 
-                  {/* Rating */}
-                  <div className="flex items-center gap-2 mb-4 pb-4" style={{ borderBottom: '1px solid #FFE8C7' }}>
-                    <div className="flex gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className="w-4 h-4"
-                          style={{
-                            fill: i < Math.floor(product.rating) ? '#FFD8A8' : '#FFE8C7',
-                            color: '#8B4513'
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-xs font-semibold" style={{ color: '#8B4513' }}>
-                      {product.rating}
-                    </span>
-                  </div>
-
-                  {/* Price and Button */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold" style={{ color: '#8B4513' }}>
-                      ${product.price}
-                    </span>
-                    <button
-                      onClick={() => addToCart(product.name)}
-                      className="px-4 py-2 rounded-lg font-semibold transition-all hover:scale-110 active:scale-95"
-                      style={{ backgroundColor: '#FFD8A8', color: '#2C1810' }}
-                    >
-                      Add
-                    </button>
-                  </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleClose}
+                    className="flex-1 py-3 rounded-lg font-bold transition-all"
+                    style={{ backgroundColor: colors.accent, color: colors.text }}
+                  >
+                    Back
+                  </button>
+                  <button
+                    className="flex-1 py-3 rounded-lg font-bold text-white transition-all"
+                    style={{ backgroundColor: colors.dark }}
+                  >
+                    Add to Cart
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-
-          {filteredProducts.length === 0 && (
-            <div className="text-center py-16">
-              <p className="text-2xl font-semibold" style={{ color: '#4A3728' }}>
-                No products found in this category
-              </p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="py-20 px-6" style={{ backgroundColor: '#8B4513' }}>
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-white mb-16">
-            Why Choose Our Rudraksha?
-          </h2>
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="text-center text-white">
-              <div className="text-5xl mb-4">✅</div>
-              <h3 className="text-2xl font-bold mb-3">100% Authentic</h3>
-              <p className="text-sm opacity-90">Genuine beads directly from trusted sources</p>
-            </div>
-            <div className="text-center text-white">
-              <div className="text-5xl mb-4">🔍</div>
-              <h3 className="text-2xl font-bold mb-3">Certified Quality</h3>
-              <p className="text-sm opacity-90">Every bead tested for authenticity</p>
-            </div>
-            <div className="text-center text-white">
-              <div className="text-5xl mb-4">🚚</div>
-              <h3 className="text-2xl font-bold mb-3">Fast Delivery</h3>
-              <p className="text-sm opacity-90">Secure packaging & worldwide shipping</p>
-            </div>
-            <div className="text-center text-white">
-              <div className="text-5xl mb-4">💬</div>
-              <h3 className="text-2xl font-bold mb-3">Expert Support</h3>
-              <p className="text-sm opacity-90">Dedicated guidance for your needs</p>
-            </div>
+            )}
           </div>
         </div>
-      </section>
+      )}
 
-      {/* CTA Section */}
-      <section className="py-20 px-6" style={{ background: 'linear-gradient(135deg, #FFD8A8 0%, #FFE8C7 100%)' }}>
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <h2 className="text-4xl md:text-5xl font-bold" style={{ color: '#2C1810' }}>
-            Begin Your Spiritual Journey
-          </h2>
-          <p className="text-lg md:text-xl" style={{ color: '#4A3728' }}>
-            {cart > 0 
-              ? `✨ You have ${cart} sacred beads in your cart! Ready to checkout?` 
-              : 'Choose your sacred Rudraksha bead and experience the spiritual transformation'}
-          </p>
-          <button
-            className="px-10 py-4 rounded-lg font-bold text-lg transition-all hover:scale-105 active:scale-95"
-            style={{ backgroundColor: '#8B4513', color: '#FFFFFF' }}
-          >
-            {cart > 0 ? `Checkout (${cart} items)` : 'Continue Shopping'}
-          </button>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-16 px-6" style={{ backgroundColor: '#2C1810' }}>
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-12">
-            <div className="md:col-span-2">
-              <h3 className="text-2xl font-bold text-white mb-4">Rudra Shaambhu</h3>
-              <p className="text-base" style={{ color: '#FFD8A8' }}>
-                Bringing authentic spiritual wisdom and sacred Rudraksha beads to seekers worldwide. 
-                Transform your meditation practice and spiritual journey with our premium collection.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-white mb-4 text-lg">Quick Links</h4>
-              <div className="space-y-3">
-                <Link href="/landing" className="block transition text-base hover:text-white" style={{ color: '#FFD8A8' }}>Home</Link>
-                <a href="#" className="block transition text-base hover:text-white" style={{ color: '#FFD8A8' }}>About Us</a>
-                <a href="#" className="block transition text-base hover:text-white" style={{ color: '#FFD8A8' }}>How to Use</a>
-              </div>
-            </div>
-            
-            <div>
-              <h4 className="font-bold text-white mb-4 text-lg">Customer Care</h4>
-              <div className="space-y-3">
-                <a href="#" className="block transition text-base hover:text-white" style={{ color: '#FFD8A8' }}>Contact Us</a>
-                <a href="#" className="block transition text-base hover:text-white" style={{ color: '#FFD8A8' }}>FAQ</a>
-                <a href="#" className="block transition text-base hover:text-white" style={{ color: '#FFD8A8' }}>Shipping Info</a>
-              </div>
-            </div>
-          </div>
-          
-          <div className="border-t border-opacity-30 pt-8 text-center" style={{ borderColor: '#FFD8A8' }}>
-            <p style={{ color: '#FFD8A8' }}>&copy; 2026 Rudra Shaambhu. All rights reserved. | Spreading spiritual wisdom worldwide 🙏</p>
-          </div>
-        </div>
-      </footer>
+      <Footer variant="simple" />
     </div>
   );
 }

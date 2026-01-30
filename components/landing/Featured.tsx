@@ -1,4 +1,5 @@
 import { Droplets } from 'lucide-react';
+import colors from '@/theme/colors';
 
 export default function Featured() {
   const collections = [
@@ -12,10 +13,10 @@ export default function Featured() {
     <section className="py-24 px-6" style={{ backgroundColor: '#FFFFFF' }}>
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: '#2C1810' }}>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: colors.text }}>
             Featured Collections
           </h2>
-          <p className="text-xl" style={{ color: '#4A3728' }}>
+          <p className="text-xl" style={{ color: colors.border }}>
             Premium quality Rudraksha for every spiritual practice
           </p>
         </div>
@@ -25,18 +26,18 @@ export default function Featured() {
             <div 
               key={i} 
               className="rounded-xl p-6 text-center transition-all hover:shadow-lg" 
-              style={{ backgroundColor: '#FFE8C7' }}
+              style={{ backgroundColor: colors.primary }}
             >
               <div className="mb-4">
-                <Droplets className="w-12 h-12 mx-auto" style={{ color: '#8B4513' }} />
+                <Droplets className="w-12 h-12 mx-auto" style={{ color: colors.dark }} />
               </div>
-              <h3 className="text-2xl font-bold mb-2" style={{ color: '#2C1810' }}>
+              <h3 className="text-2xl font-bold mb-2" style={{ color: colors.text }}>
                 {item.name}
               </h3>
-              <p className="mb-4 text-sm" style={{ color: '#4A3728' }}>
+              <p className="mb-4 text-sm" style={{ color: colors.border }}>
                 {item.desc}
               </p>
-              <p className="text-3xl font-bold" style={{ color: '#8B4513' }}>
+              <p className="text-3xl font-bold" style={{ color: colors.dark }}>
                 {item.price}
               </p>
             </div>
