@@ -1,98 +1,65 @@
 "use client";
 
-import { SetStateAction, useState } from 'react';
+import { useState } from 'react';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
+import { useCurrency } from '@/components/common/CurrencyProvider';
 import colors from '@/theme/colors';
+import { ExploreRecommendationResponse, fetchExploreRecommendation } from '@/lib/api';
 
 export default function RudrakshRecommendationPage() {
+  const { formatPrice } = useCurrency();
   const [activeWidget, setActiveWidget] = useState<string | null>(null);
   const [formData, setFormData] = useState({ date: '', name: '' });
-  const [result, setResult] = useState(null);
-
-  const horoscopeMap = {
-    'aries': { name: '3 Mukhi', price: 20, benefits: ['Confidence & Courage', 'Vitality', 'Inner Strength'] },
-    'taurus': { name: '5 Mukhi', price: 15, benefits: ['Health & Vitality', 'Mental Peace', 'Protection'] },
-    'gemini': { name: '4 Mukhi', price: 19, benefits: ['Creativity', 'Communication', 'Expression'] },
-    'cancer': { name: '2 Mukhi', price: 18, benefits: ['Relationship Harmony', 'Balance', 'Peace'] },
-    'leo': { name: '12 Mukhi', price: 38, benefits: ['Leadership & Success', 'Authority', 'Confidence'] },
-    'virgo': { name: '6 Mukhi', price: 22, benefits: ['Intelligence & Wisdom', 'Focus', 'Academic Success'] },
-    'libra': { name: '2 Mukhi', price: 18, benefits: ['Balance & Harmony', 'Peace', 'Justice'] },
-    'scorpio': { name: '8 Mukhi', price: 28, benefits: ['Courage & Strength', 'Fearlessness', 'Power'] },
-    'sagittarius': { name: '7 Mukhi', price: 25, benefits: ['Wealth & Prosperity', 'Success', 'Good Fortune'] },
-    'capricorn': { name: '11 Mukhi', price: 35, benefits: ['Spiritual Growth', 'Deep Meditation', 'Divine Grace'] },
-    'aquarius': { name: '9 Mukhi', price: 32, benefits: ['Emotional Balance', 'Intuition', 'Peace'] },
-    'pisces': { name: '13 Mukhi', price: 42, benefits: ['Love & Attraction', 'Relationships', 'Harmony'] }
-  };
-
-  const bhagyankMap = {
-    1: { name: '1 Mukhi', price: 45, benefits: ['Divine Manifestation', 'Supreme Consciousness', 'Enlightenment'] },
-    2: { name: '2 Mukhi', price: 18, benefits: ['Relationship Harmony', 'Balance', 'Peace'] },
-    3: { name: '3 Mukhi', price: 20, benefits: ['Confidence & Courage', 'Vitality', 'Inner Strength'] },
-    4: { name: '4 Mukhi', price: 19, benefits: ['Creativity', 'Communication', 'Expression'] },
-    5: { name: '5 Mukhi', price: 15, benefits: ['Health & Vitality', 'Mental Peace', 'Protection'] },
-    6: { name: '6 Mukhi', price: 22, benefits: ['Intelligence & Wisdom', 'Focus', 'Academic Success'] },
-    7: { name: '7 Mukhi', price: 25, benefits: ['Wealth & Prosperity', 'Success', 'Good Fortune'] },
-    8: { name: '8 Mukhi', price: 28, benefits: ['Courage & Strength', 'Fearlessness', 'Power'] },
-    9: { name: '9 Mukhi', price: 32, benefits: ['Emotional Balance', 'Intuition', 'Peace'] }
-  };
-
-  const getZodiac = (month: string, date: string) => {
-    const signs = ['capricorn', 'aquarius', 'pisces', 'aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius'];
-    const daysInMonth = [20, 19, 20, 20, 21, 21, 23, 23, 23, 23, 22, 22];
-    if (date < daysInMonth[month - 1]) return signs[month - 1];
-    return signs[month % 12];
-  };
-
-  const calculateBhagyank = (date: string) => {
-    let sum = parseInt(date);
-    while (sum > 9) sum = Math.floor(sum / 10) + (sum % 10);
-    return sum;
-  };
-
-  const calculateNameNumerology = (text: string) => {
-    const map = { a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8, i: 9, j: 1, k: 2, l: 3, m: 4, n: 5, o: 6, p: 7, q: 8, r: 9, s: 1, t: 2, u: 3, v: 4, w: 5, x: 6, y: 7, z: 8 };
-    let sum = 0;
-    text.toLowerCase().split('').forEach(char => { if (map[char]) sum += map[char]; });
-    while (sum > 9) sum = Math.floor(sum / 10) + (sum % 10);
-    return sum;
-  };
+  const [result, setResult] = useState<ExploreRecommendationResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleWidgetClick = (type: string) => {
     setActiveWidget(type);
     setResult(null);
+    setError(null);
   };
 
-  const handleGetRecommendation = (type: string) => {
+  const handleGetRecommendation = async (type: 'horoscope' | 'bhagyank' | 'name') => {
     if (type === 'horoscope' && !formData.date) {
-      alert('Please enter your birth date');
+      setError('Please enter your birth date');
+      return;
+    }
+    if (type === 'bhagyank' && !formData.date) {
+      setError('Please enter your birth date');
       return;
     }
     if (type === 'name' && !formData.name) {
-      alert('Please enter your name');
+      setError('Please enter your name');
       return;
     }
 
-    let recommendation;
-    if (type === 'horoscope') {
-      const [year, month, date] = formData.date.split('-');
-      const zodiac = getZodiac(month, date);
-      recommendation = { ...horoscopeMap[zodiac], type: 'Horoscope', label: zodiac.charAt(0).toUpperCase() + zodiac.slice(1) };
-    } else if (type === 'bhagyank') {
-      const [year, month, date] = formData.date.split('-');
-      const bhagyank = calculateBhagyank(date);
-      recommendation = { ...bhagyankMap[bhagyank], type: 'Bhagyank', label: `Lucky Number ${bhagyank}` };
-    } else {
-      const nameNum = calculateNameNumerology(formData.name);
-      recommendation = { ...bhagyankMap[nameNum], type: 'Name Numerology', label: `Numerology ${nameNum}` };
-    }
+    setLoading(true);
+    setError(null);
 
-    setResult(recommendation);
+    try {
+      const recommendation = await fetchExploreRecommendation({
+        type,
+        date: formData.date || undefined,
+        name: formData.name.trim() || undefined
+      });
+
+      setResult(recommendation);
+    } catch (requestError) {
+      const fallbackMessage = 'Could not calculate your recommendation right now.';
+      setError(requestError instanceof Error ? requestError.message : fallbackMessage);
+      setResult(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClose = () => {
     setActiveWidget(null);
     setResult(null);
+    setError(null);
+    setLoading(false);
     setFormData({ date: '', name: '' });
   };
 
@@ -205,12 +172,19 @@ export default function RudrakshRecommendationPage() {
                   )}
                 </div>
 
+                {error && (
+                  <p className="mb-4 text-sm" style={{ color: '#b91c1c' }}>
+                    {error}
+                  </p>
+                )}
+
                 <button
-                  onClick={() => handleGetRecommendation(activeWidget)}
-                  className="w-full py-3 rounded-lg font-bold text-white transition-all hover:scale-105"
+                  onClick={() => handleGetRecommendation(activeWidget as 'horoscope' | 'bhagyank' | 'name')}
+                  className="w-full py-3 rounded-lg font-bold text-white transition-all hover:scale-105 disabled:opacity-70"
                   style={{ backgroundColor: colors.dark }}
+                  disabled={loading}
                 >
-                  Get Recommendation
+                  {loading ? 'Calculating...' : 'Get Recommendation'}
                 </button>
               </>
             ) : (
@@ -220,10 +194,10 @@ export default function RudrakshRecommendationPage() {
                     {result.label}
                   </p>
                   <h4 className="text-3xl font-bold mt-2" style={{ color: colors.text }}>
-                    {result.name} Rudraksha
+                    {result.item.name}
                   </h4>
                   <p className="text-lg font-semibold mt-2" style={{ color: colors.accent }}>
-                    ${result.price}
+                    {formatPrice(result.item.price)}
                   </p>
                 </div>
 
@@ -232,7 +206,7 @@ export default function RudrakshRecommendationPage() {
                     Benefits:
                   </p>
                   <div className="space-y-2">
-                    {result.benefits.map((benefit, i) => (
+                    {result.item.benefits.map((benefit, i) => (
                       <div key={i} className="flex items-center gap-2">
                         <span>✨</span>
                         <span style={{ color: colors.border }}>{benefit}</span>
@@ -252,6 +226,7 @@ export default function RudrakshRecommendationPage() {
                   <button
                     className="flex-1 py-3 rounded-lg font-bold text-white transition-all"
                     style={{ backgroundColor: colors.dark }}
+                    onClick={() => window.alert('Cart integration will be connected in the next step.')}
                   >
                     Add to Cart
                   </button>

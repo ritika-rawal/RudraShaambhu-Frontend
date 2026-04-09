@@ -1,12 +1,17 @@
-import { Droplets } from 'lucide-react';
+"use client";
+
+import Image from 'next/image';
+import { useCurrency } from '@/components/common/CurrencyProvider';
 import colors from '@/theme/colors';
+import { getMukhiImageSrc } from '@/lib/mukhiImages';
 
 export default function Featured() {
+  const { formatPrice } = useCurrency();
   const collections = [
-    { name: '1 Mukhi', price: '$45', desc: 'Power & manifestation' },
-    { name: '5 Mukhi', price: '$15', desc: 'Health & protection' },
-    { name: '7 Mukhi', price: '$25', desc: 'Wealth & prosperity' },
-    { name: '11 Mukhi', price: '$35', desc: 'Spiritual growth' }
+    { name: '1 Mukhi', mukhi: 1, price: 45, desc: 'Power & manifestation' },
+    { name: '5 Mukhi', mukhi: 5, price: 15, desc: 'Health & protection' },
+    { name: '7 Mukhi', mukhi: 7, price: 25, desc: 'Wealth & prosperity' },
+    { name: '11 Mukhi', mukhi: 11, price: 35, desc: 'Spiritual growth' }
   ];
 
   return (
@@ -28,8 +33,14 @@ export default function Featured() {
               className="rounded-xl p-6 text-center transition-all hover:shadow-lg" 
               style={{ backgroundColor: colors.primary }}
             >
-              <div className="mb-4">
-                <Droplets className="w-12 h-12 mx-auto" style={{ color: colors.dark }} />
+              <div className="relative mb-4 h-28 w-full overflow-hidden rounded-lg bg-white/70">
+                <Image
+                  src={getMukhiImageSrc(item.mukhi)}
+                  alt={item.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 25vw"
+                />
               </div>
               <h3 className="text-2xl font-bold mb-2" style={{ color: colors.text }}>
                 {item.name}
@@ -38,7 +49,7 @@ export default function Featured() {
                 {item.desc}
               </p>
               <p className="text-3xl font-bold" style={{ color: colors.dark }}>
-                {item.price}
+                {formatPrice(item.price)}
               </p>
             </div>
           ))}
