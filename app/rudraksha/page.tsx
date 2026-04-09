@@ -158,6 +158,7 @@ export default function RudrakshaPage() {
   const [nameRecommendation, setNameRecommendation] = useState<RecommendationResponse | null>(null);
   const [dobRecommendation, setDobRecommendation] = useState<RecommendationResponse | null>(null);
   const [selectedZodiac, setSelectedZodiac] = useState<ZodiacKey>("aries");
+  const [zodiacModalOpen, setZodiacModalOpen] = useState<ZodiacKey | null>(null);
   const [recoLoading, setRecoLoading] = useState(false);
   const [recoError, setRecoError] = useState<string | null>(null);
 
@@ -308,7 +309,7 @@ export default function RudrakshaPage() {
                 Horoscope by Zodiac
               </h2>
               <p className="mt-1 text-xs text-[#4A3728]">
-                Select your zodiac sign to view combinations and focus topics.
+                Click on your zodiac sign to view combinations and focus topics.
               </p>
 
               <div className="mt-3 flex flex-wrap gap-2">
@@ -316,39 +317,19 @@ export default function RudrakshaPage() {
                   <button
                     key={zodiac}
                     type="button"
-                    onClick={() => setSelectedZodiac(zodiac)}
-                    className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                    onClick={() => {
+                      setSelectedZodiac(zodiac);
+                      setZodiacModalOpen(zodiac);
+                    }}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold transition cursor-pointer hover:shadow-md ${
                       selectedZodiac === zodiac
                         ? "bg-[#8B4513] text-white"
-                        : "border border-[#FFD8A8] bg-white text-[#2C1810]"
+                        : "border border-[#FFD8A8] bg-white text-[#2C1810] hover:bg-[#fffbf5]"
                     }`}
                   >
                     {ZODIAC_INFO[zodiac].title}
                   </button>
                 ))}
-              </div>
-
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <article>
-                  <p className="text-xs uppercase tracking-wide text-[#4A3728]">Combinations</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {ZODIAC_INFO[selectedZodiac].combinations.map((item) => (
-                      <span key={item} className="rounded-full bg-white px-2 py-1 text-xs font-medium text-[#2C1810]">
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </article>
-                <article>
-                  <p className="text-xs uppercase tracking-wide text-[#4A3728]">Topics</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {ZODIAC_INFO[selectedZodiac].topics.map((topic) => (
-                      <span key={topic} className="rounded-full bg-white px-2 py-1 text-xs font-medium text-[#2C1810]">
-                        {topic}
-                      </span>
-                    ))}
-                  </div>
-                </article>
               </div>
             </div>
           </div>
@@ -489,6 +470,80 @@ export default function RudrakshaPage() {
       </main>
 
       <Footer variant="simple" />
+
+      {zodiacModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white shadow-2xl">
+            {/* Header */}
+            <div className="sticky top-0 border-b border-[#FFD8A8] bg-gradient-to-r from-[#FFE8C7] to-[#FFD8A8] p-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-[#2C1810]">
+                  {ZODIAC_INFO[zodiacModalOpen].title}
+                </h2>
+                <button
+                  onClick={() => setZodiacModalOpen(null)}
+                  className="ml-4 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-[#2C1810] transition hover:bg-white"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="space-y-6 p-6">
+              {/* Combinations */}
+              <div>
+                <p className="mb-3 text-sm font-bold uppercase tracking-wide text-[#8B4513]">
+                  Recommended Mukhi Combinations
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {ZODIAC_INFO[zodiacModalOpen].combinations.map((item) => (
+                    <span
+                      key={item}
+                      className="inline-block rounded-full bg-gradient-to-r from-[#FFE8C7] to-[#FFD8A8] px-4 py-2 text-sm font-semibold text-[#2C1810]"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Topics */}
+              <div>
+                <p className="mb-3 text-sm font-bold uppercase tracking-wide text-[#8B4513]">
+                  Focus Topics
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {ZODIAC_INFO[zodiacModalOpen].topics.map((topic) => (
+                    <span
+                      key={topic}
+                      className="inline-block rounded-full border-2 border-[#FFD8A8] px-4 py-2 text-sm font-medium text-[#2C1810]"
+                    >
+                      {topic}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Info Box */}
+              <div className="rounded-xl bg-[#fff7eb] p-4">
+                <p className="text-sm text-[#4A3728]">
+                  {ZODIAC_INFO[zodiacModalOpen].title}s can benefit from the recommended Mukhi combinations
+                  to enhance focus on these key life areas.
+                </p>
+              </div>
+
+              {/* Close Button */}
+              <button
+                onClick={() => setZodiacModalOpen(null)}
+                className="w-full rounded-lg bg-[#8B4513] py-3 text-sm font-semibold text-white transition hover:bg-[#6B3410]"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -6,7 +6,7 @@ import GoogleProvider from "next-auth/providers/google";
 const API_BASE_URL =
   process.env.BACKEND_API_BASE_URL ||
   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "http://localhost:4000/api";
+  "http://localhost:5000/api";
 
 function sanitizeEnv(value: string | undefined) {
   return String(value || "").trim().replace(/^['\"]|['\"]$/g, "");
@@ -38,58 +38,103 @@ const hasGoogleProvider =
   googleClientId.endsWith(".apps.googleusercontent.com");
 const hasAppleProvider = isConfigured(appleClientId) && isConfigured(appleClientSecret);
 
+/**
+ * Sync social login user with backend
+ * Creates or updates user in MongoDB and returns JWT tokens
+ */
 async function syncSocialUser(params: {
   provider: "google" | "apple";
-  providerAccountId?: string | null;
   name?: string | null;
   email?: string | null;
   image?: string | null;
+  idToken?: string;
 }) {
-  const fallbackEmail = params.providerAccountId
-    ? `${params.providerAccountId}@${params.provider}.oauth.local`
-    : `unknown-${Date.now()}@${params.provider}.oauth.local`;
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/${params.provider}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: params.name || "User",
+        email: params.email,
+        image: params.image || "",
+        idToken: params.idToken
+      })
+    });
 
-  const body = {
-    name: params.name || "Guest User",
-    email: params.email || fallbackEmail,
-    image: params.image || ""
-  };
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || `Auth sync failed with status ${response.status}`);
+    }
 
-  const response = await fetch(`${API_BASE_URL}/auth/${params.provider}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
+    const data = await response.json();
+    
+    // Store JWT tokens in session/local storage for API requests
+    if (data.accessToken) {
+      // Store in session (cleared on browser close)
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("accessToken", data.accessToken);
+        sessionStorage.setItem("refreshToken", data.refreshToken || "");
+      }
+    }
 
-  if (!response.ok) {
-    throw new Error(`Auth sync failed with status ${response.status}`);
+    return {
+      id: data.user?.id || data.user?.email,
+      name: data.user?.name || "User",
+      email: data.user?.email,
+      image: data.user?.image,
+      provider: params.provider,
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken
+    };
+  } catch (error) {
+    console.error(`${params.provider} sync error:`, error);
+    throw error;
   }
-
-  const payload = await response.json();
-  return payload.user as { id: string; name: string; email: string; image?: string; provider: string };
 }
 
+/**
+ * Sync guest user with backend
+ */
 async function syncGuestUser(params: { name: string; email: string }) {
-  const response = await fetch(`${API_BASE_URL}/auth/guest`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      name: params.name,
-      email: params.email,
-      image: ""
-    })
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/guest`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: params.name,
+        email: params.email
+      })
+    });
 
-  if (!response.ok) {
-    throw new Error(`Guest auth failed with status ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`Guest auth failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Store tokens
+    if (data.accessToken && typeof window !== "undefined") {
+      sessionStorage.setItem("accessToken", data.accessToken);
+      sessionStorage.setItem("refreshToken", data.refreshToken || "");
+    }
+
+    return {
+      id: data.user?.id || data.user?.email,
+      name: data.user?.name,
+      email: data.user?.email,
+      image: data.user?.image || "",
+      provider: "credentials",
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken
+    };
+  } catch (error) {
+    console.error("Guest auth error:", error);
+    throw error;
   }
-
-  const payload = await response.json();
-  return payload.user as { id: string; name: string; email: string; image?: string; provider: string };
 }
 
 export const authOptions: NextAuthOptions = {
@@ -98,7 +143,8 @@ export const authOptions: NextAuthOptions = {
       ? [
           GoogleProvider({
             clientId: googleClientId,
-            clientSecret: googleClientSecret
+            clientSecret: googleClientSecret,
+            allowDangerousEmailAccountLinking: true
           })
         ]
       : []),
@@ -106,7 +152,8 @@ export const authOptions: NextAuthOptions = {
       ? [
           AppleProvider({
             clientId: appleClientId,
-            clientSecret: appleClientSecret
+            clientSecret: appleClientSecret,
+            allowDangerousEmailAccountLinking: true
           })
         ]
       : []),
@@ -131,13 +178,8 @@ export const authOptions: NextAuthOptions = {
           name: backendUser.name,
           email: backendUser.email,
           image: backendUser.image,
-          backendUserId: backendUser.id
-        } as unknown as {
-          id: string;
-          name: string;
-          email: string;
-          image?: string;
-          backendUserId: string;
+          accessToken: backendUser.accessToken,
+          refreshToken: backendUser.refreshToken
         };
       }
     })
@@ -148,49 +190,67 @@ export const authOptions: NextAuthOptions = {
   },
   debug: process.env.NODE_ENV === "development",
   callbacks: {
-    async signIn({ user, account }) {
-      const provider = account?.provider;
-      if (provider === "credentials") {
-        return true;
-      }
-
-      if (provider !== "google" && provider !== "apple") {
-        return false;
-      }
-
+    async signIn({ user, account, profile }) {
       try {
+        const provider = account?.provider;
+        
+        // Credentials provider (guest login)
+        if (provider === "credentials") {
+          return true;
+        }
+
+        // OAuth providers
+        if (provider !== "google" && provider !== "apple") {
+          return false;
+        }
+
+        // Sync user with backend
         const backendUser = await syncSocialUser({
-          provider,
-          providerAccountId: account?.providerAccountId,
+          provider: provider as "google" | "apple",
           name: user.name,
           email: user.email,
-          image: user.image
+          image: user.image,
+          idToken: account?.id_token
         });
 
-        (user as { backendUserId?: string }).backendUserId = backendUser.id;
+        // Store tokens in user object for jwt callback
+        (user as any).accessToken = backendUser.accessToken;
+        (user as any).refreshToken = backendUser.refreshToken;
+
         return true;
       } catch (error) {
-        console.error("Failed to sync social user with backend", {
-          provider,
-          message: error instanceof Error ? error.message : "unknown error"
-        });
+        console.error("SignIn callback error:", error);
         return false;
       }
     },
-    async jwt({ token, user }) {
-      if (user) {
-        token.backendUserId = (user as { backendUserId?: string }).backendUserId;
-      }
 
+    async jwt({ token, user, account }) {
+      // Initial sign in
+      if (user) {
+        token.id = user.id;
+        token.accessToken = (user as any).accessToken;
+        token.refreshToken = (user as any).refreshToken;
+        token.provider = account?.provider;
+      }
       return token;
     },
-    async session({ session, token }) {
-      if (session.user && token.backendUserId) {
-        session.user.id = String(token.backendUserId);
-      }
 
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+        (session.user as any).accessToken = token.accessToken;
+        (session.user as any).refreshToken = token.refreshToken;
+        (session.user as any).provider = token.provider;
+      }
       return session;
     }
   },
-  secret: process.env.NEXTAUTH_SECRET
+  session: {
+    strategy: "jwt",
+    maxAge: 7 * 24 * 60 * 60 // 7 days
+  },
+  jwt: {
+    maxAge: 7 * 24 * 60 * 60 // 7 days
+  },
+  secret: process.env.NEXTAUTH_SECRET || process.env.NEXTAUTH_SECRET
 };
