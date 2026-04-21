@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Footer from "@/components/common/Footer";
 import Header from "@/components/common/Header";
 import { useCart } from "@/components/cart/CartProvider";
@@ -33,8 +35,39 @@ type ZodiacKey =
 
 type ZodiacInfo = {
   title: string;
-  combinations: string[];
-  topics: string[];
+  topicRecommendations: Record<TopicKey, string[]>;
+};
+
+const TOPIC_KEYS = [
+  "mental_stability",
+  "financial_stability",
+  "max_effort_results",
+  "property_luxury_growth",
+  "education",
+  "health",
+  "relationship_marriage",
+  "spiritual_enhancement",
+  "increase_luck",
+  "work_results",
+  "increase_income",
+  "manage_expense"
+] as const;
+
+type TopicKey = (typeof TOPIC_KEYS)[number];
+
+const TOPIC_LABELS: Record<TopicKey, string> = {
+  mental_stability: "Mental stability and development",
+  financial_stability: "Financial stability (for increasing saving)",
+  max_effort_results: "To get max effort results",
+  property_luxury_growth: "Property or Luxury growth",
+  education: "Education purpose",
+  health: "Health",
+  relationship_marriage: "Relationship and marriage life",
+  spiritual_enhancement: "Spiritual enhancement",
+  increase_luck: "To increase your luck",
+  work_results: "To better result in work area",
+  increase_income: "To increase income",
+  manage_expense: "To manage your expense"
 };
 
 const ZODIAC_ORDER: ZodiacKey[] = [
@@ -55,63 +88,207 @@ const ZODIAC_ORDER: ZodiacKey[] = [
 const ZODIAC_INFO: Record<ZodiacKey, ZodiacInfo> = {
   aries: {
     title: "Aries",
-    combinations: ["3 Mukhi", "3 + 5 Mukhi"],
-    topics: ["Confidence", "Action", "Leadership"]
+    topicRecommendations: {
+      mental_stability: ["3 Mukhi"],
+      financial_stability: ["6 Mukhi"],
+      max_effort_results: ["4 Mukhi"],
+      property_luxury_growth: ["2 Mukhi"],
+      education: ["1 Mukhi"],
+      health: ["4 Mukhi"],
+      relationship_marriage: ["6 Mukhi"],
+      spiritual_enhancement: ["3 Mukhi"],
+      increase_luck: ["5 Mukhi"],
+      work_results: ["7 Mukhi"],
+      increase_income: ["7 Mukhi"],
+      manage_expense: ["5 Mukhi"]
+    }
   },
   taurus: {
     title: "Taurus",
-    combinations: ["5 Mukhi", "5 + 6 Mukhi"],
-    topics: ["Stability", "Wealth", "Grounded routine"]
+    topicRecommendations: {
+      mental_stability: ["6 Mukhi"],
+      financial_stability: ["4 Mukhi"],
+      max_effort_results: ["2 Mukhi"],
+      property_luxury_growth: ["1 Mukhi"],
+      education: ["4 Mukhi"],
+      health: ["6 Mukhi"],
+      relationship_marriage: ["3 Mukhi"],
+      spiritual_enhancement: ["5 Mukhi"],
+      increase_luck: ["7 Mukhi"],
+      work_results: ["7 Mukhi"],
+      increase_income: ["5 Mukhi"],
+      manage_expense: ["3 Mukhi"]
+    }
   },
   gemini: {
     title: "Gemini",
-    combinations: ["4 Mukhi", "4 + 6 Mukhi"],
-    topics: ["Communication", "Learning", "Creativity"]
+    topicRecommendations: {
+      mental_stability: ["4 Mukhi"],
+      financial_stability: ["2 Mukhi"],
+      max_effort_results: ["1 Mukhi"],
+      property_luxury_growth: ["4 Mukhi"],
+      education: ["6 Mukhi"],
+      health: ["3 Mukhi"],
+      relationship_marriage: ["5 Mukhi"],
+      spiritual_enhancement: ["7 Mukhi"],
+      increase_luck: ["7 Mukhi"],
+      work_results: ["5 Mukhi"],
+      increase_income: ["3 Mukhi"],
+      manage_expense: ["6 Mukhi"]
+    }
   },
   cancer: {
     title: "Cancer",
-    combinations: ["2 Mukhi", "2 + 9 Mukhi"],
-    topics: ["Emotional balance", "Family harmony", "Inner peace"]
+    topicRecommendations: {
+      mental_stability: ["2 Mukhi"],
+      financial_stability: ["1 Mukhi"],
+      max_effort_results: ["4 Mukhi"],
+      property_luxury_growth: ["6 Mukhi"],
+      education: ["3 Mukhi"],
+      health: ["5 Mukhi"],
+      relationship_marriage: ["7 Mukhi"],
+      spiritual_enhancement: ["7 Mukhi"],
+      increase_luck: ["5 Mukhi"],
+      work_results: ["3 Mukhi"],
+      increase_income: ["6 Mukhi"],
+      manage_expense: ["4 Mukhi"]
+    }
   },
   leo: {
     title: "Leo",
-    combinations: ["1 Mukhi", "1 + 12 Mukhi"],
-    topics: ["Authority", "Visibility", "Self-belief"]
+    topicRecommendations: {
+      mental_stability: ["1 Mukhi"],
+      financial_stability: ["4 Mukhi"],
+      max_effort_results: ["6 Mukhi"],
+      property_luxury_growth: ["3 Mukhi"],
+      education: ["5 Mukhi"],
+      health: ["7 Mukhi"],
+      relationship_marriage: ["7 Mukhi"],
+      spiritual_enhancement: ["5 Mukhi"],
+      increase_luck: ["3 Mukhi"],
+      work_results: ["6 Mukhi"],
+      increase_income: ["4 Mukhi"],
+      manage_expense: ["2 Mukhi"]
+    }
   },
   virgo: {
     title: "Virgo",
-    combinations: ["6 Mukhi", "4 + 6 Mukhi"],
-    topics: ["Focus", "Health discipline", "Clarity"]
+    topicRecommendations: {
+      mental_stability: ["4 Mukhi"],
+      financial_stability: ["6 Mukhi"],
+      max_effort_results: ["3 Mukhi"],
+      property_luxury_growth: ["5 Mukhi"],
+      education: ["7 Mukhi"],
+      health: ["7 Mukhi"],
+      relationship_marriage: ["5 Mukhi"],
+      spiritual_enhancement: ["3 Mukhi"],
+      increase_luck: ["6 Mukhi"],
+      work_results: ["4 Mukhi"],
+      increase_income: ["2 Mukhi"],
+      manage_expense: ["1 Mukhi"]
+    }
   },
   libra: {
     title: "Libra",
-    combinations: ["2 Mukhi", "2 + 5 Mukhi"],
-    topics: ["Balance", "Relationships", "Decision making"]
+    topicRecommendations: {
+      mental_stability: ["6 Mukhi"],
+      financial_stability: ["3 Mukhi"],
+      max_effort_results: ["5 Mukhi"],
+      property_luxury_growth: ["7 Mukhi"],
+      education: ["7 Mukhi"],
+      health: ["5 Mukhi"],
+      relationship_marriage: ["3 Mukhi"],
+      spiritual_enhancement: ["6 Mukhi"],
+      increase_luck: ["4 Mukhi"],
+      work_results: ["2 Mukhi"],
+      increase_income: ["1 Mukhi"],
+      manage_expense: ["4 Mukhi"]
+    }
   },
   scorpio: {
     title: "Scorpio",
-    combinations: ["8 Mukhi", "8 + 9 Mukhi"],
-    topics: ["Protection", "Transformation", "Willpower"]
+    topicRecommendations: {
+      mental_stability: ["3 Mukhi"],
+      financial_stability: ["5 Mukhi"],
+      max_effort_results: ["7 Mukhi"],
+      property_luxury_growth: ["7 Mukhi"],
+      education: ["5 Mukhi"],
+      health: ["3 Mukhi"],
+      relationship_marriage: ["6 Mukhi"],
+      spiritual_enhancement: ["4 Mukhi"],
+      increase_luck: ["2 Mukhi"],
+      work_results: ["1 Mukhi"],
+      increase_income: ["4 Mukhi"],
+      manage_expense: ["6 Mukhi"]
+    }
   },
   sagittarius: {
     title: "Sagittarius",
-    combinations: ["7 Mukhi", "7 + 11 Mukhi"],
-    topics: ["Growth", "Fortune", "Spiritual expansion"]
+    topicRecommendations: {
+      mental_stability: ["5 Mukhi"],
+      financial_stability: ["7 Mukhi"],
+      max_effort_results: ["7 Mukhi"],
+      property_luxury_growth: ["5 Mukhi"],
+      education: ["3 Mukhi"],
+      health: ["6 Mukhi"],
+      relationship_marriage: ["4 Mukhi"],
+      spiritual_enhancement: ["2 Mukhi"],
+      increase_luck: ["1 Mukhi"],
+      work_results: ["4 Mukhi"],
+      increase_income: ["6 Mukhi"],
+      manage_expense: ["3 Mukhi"]
+    }
   },
   capricorn: {
     title: "Capricorn",
-    combinations: ["11 Mukhi", "11 + 5 Mukhi"],
-    topics: ["Discipline", "Career goals", "Consistency"]
+    topicRecommendations: {
+      mental_stability: ["7 Mukhi"],
+      financial_stability: ["7 Mukhi"],
+      max_effort_results: ["5 Mukhi"],
+      property_luxury_growth: ["3 Mukhi"],
+      education: ["6 Mukhi"],
+      health: ["4 Mukhi"],
+      relationship_marriage: ["2 Mukhi"],
+      spiritual_enhancement: ["1 Mukhi"],
+      increase_luck: ["4 Mukhi"],
+      work_results: ["6 Mukhi"],
+      increase_income: ["3 Mukhi"],
+      manage_expense: ["5 Mukhi"]
+    }
   },
   aquarius: {
     title: "Aquarius",
-    combinations: ["9 Mukhi", "9 + 4 Mukhi"],
-    topics: ["Innovation", "Vision", "Emotional strength"]
+    topicRecommendations: {
+      mental_stability: ["7 Mukhi"],
+      financial_stability: ["5 Mukhi"],
+      max_effort_results: ["3 Mukhi"],
+      property_luxury_growth: ["6 Mukhi"],
+      education: ["4 Mukhi"],
+      health: ["2 Mukhi"],
+      relationship_marriage: ["1 Mukhi"],
+      spiritual_enhancement: ["4 Mukhi"],
+      increase_luck: ["6 Mukhi"],
+      work_results: ["3 Mukhi"],
+      increase_income: ["5 Mukhi"],
+      manage_expense: ["7 Mukhi"]
+    }
   },
   pisces: {
     title: "Pisces",
-    combinations: ["6 Mukhi", "6 + 2 Mukhi"],
-    topics: ["Intuition", "Compassion", "Spirituality"]
+    topicRecommendations: {
+      mental_stability: ["5 Mukhi"],
+      financial_stability: ["3 Mukhi"],
+      max_effort_results: ["6 Mukhi"],
+      property_luxury_growth: ["4 Mukhi"],
+      education: ["2 Mukhi"],
+      health: ["1 Mukhi"],
+      relationship_marriage: ["4 Mukhi"],
+      spiritual_enhancement: ["6 Mukhi"],
+      increase_luck: ["3 Mukhi"],
+      work_results: ["5 Mukhi"],
+      increase_income: ["7 Mukhi"],
+      manage_expense: ["7 Mukhi"]
+    }
   }
 };
 
@@ -145,6 +322,8 @@ function getZodiacFromDob(value: string): ZodiacKey | null {
 }
 
 export default function RudrakshaPage() {
+  const router = useRouter();
+  const { status } = useSession();
   const { addItem, itemCount } = useCart();
   const { formatPrice } = useCurrency();
   const [selectedMukhi, setSelectedMukhi] = useState("all");
@@ -257,18 +436,57 @@ export default function RudrakshaPage() {
   const lifePathNumber = dobRecommendation?.lifePathNumber ?? null;
   const nameNumber = nameRecommendation?.nameNumber ?? null;
 
+  const mukhiToProductId = useMemo(() => {
+    const map = new Map<string, string>();
+
+    products.forEach((product) => {
+      const mukhiKey = String(product.mukhi || "").replace(/\D/g, "");
+      const productId = String(product._id || product.id || "");
+      if (mukhiKey && productId && !map.has(mukhiKey)) {
+        map.set(mukhiKey, productId);
+      }
+    });
+
+    recommendationItems.forEach((product) => {
+      const mukhiKey = String(product.mukhi || "").replace(/\D/g, "");
+      const productId = String(product._id || product.id || "");
+      if (mukhiKey && productId && !map.has(mukhiKey)) {
+        map.set(mukhiKey, productId);
+      }
+    });
+
+    return map;
+  }, [products, recommendationItems]);
+
   const mukhiOptions = useMemo(
     () => ["all", ...Array.from({ length: 14 }, (_, i) => String(i + 1))],
     []
   );
 
   async function handleAddToCart(product: RudrakshaProduct) {
+    if (status !== "authenticated") {
+      router.push("/login?callbackUrl=/checkout");
+      return;
+    }
+
     setAddingProductId(String(product._id || product.id));
     try {
       await addItem(product, 1);
     } finally {
       setAddingProductId(null);
     }
+  }
+
+  function handleMukhiClick(mukhiLabel: string) {
+    const mukhiKey = String(mukhiLabel || "").replace(/\D/g, "");
+    const targetProductId = mukhiToProductId.get(mukhiKey);
+
+    if (!targetProductId) {
+      return;
+    }
+
+    setZodiacModalOpen(null);
+    router.push(`/rudraksha/${targetProductId}`);
   }
 
   return (
@@ -473,7 +691,7 @@ export default function RudrakshaPage() {
 
       {zodiacModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white shadow-2xl">
+          <div className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
             {/* Header */}
             <div className="sticky top-0 border-b border-[#FFD8A8] bg-gradient-to-r from-[#FFE8C7] to-[#FFD8A8] p-6">
               <div className="flex items-center justify-between">
@@ -490,43 +708,56 @@ export default function RudrakshaPage() {
             </div>
 
             {/* Content */}
-            <div className="space-y-6 p-6">
-              {/* Combinations */}
-              <div>
-                <p className="mb-3 text-sm font-bold uppercase tracking-wide text-[#8B4513]">
-                  Recommended Mukhi Combinations
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {ZODIAC_INFO[zodiacModalOpen].combinations.map((item) => (
-                    <span
-                      key={item}
-                      className="inline-block rounded-full bg-gradient-to-r from-[#FFE8C7] to-[#FFD8A8] px-4 py-2 text-sm font-semibold text-[#2C1810]"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
+            <div className="space-y-6 p-5 sm:p-6">
               {/* Topics */}
               <div>
                 <p className="mb-3 text-sm font-bold uppercase tracking-wide text-[#8B4513]">
-                  Focus Topics
+                  12 Topic-Wise Rudraksha
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  {ZODIAC_INFO[zodiacModalOpen].topics.map((topic) => (
-                    <span
-                      key={topic}
-                      className="inline-block rounded-full border-2 border-[#FFD8A8] px-4 py-2 text-sm font-medium text-[#2C1810]"
+                <p className="mb-4 text-xs text-[#6B4B35]">
+                  Personalized topic mapping for {ZODIAC_INFO[zodiacModalOpen].title}.
+                </p>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {TOPIC_KEYS.map((topicKey, index) => (
+                    <div
+                      key={topicKey}
+                      className="rounded-2xl border border-[#F4CFA4] bg-[#fffaf3] px-4 py-3"
                     >
-                      {topic}
-                    </span>
+                      <div className="grid grid-cols-[1fr_auto] items-start gap-3">
+                        <div className="flex items-start gap-3">
+                          <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#F8E9D6] text-xs font-bold text-[#8B4513]">
+                            {index + 1}
+                          </span>
+                          <p className="text-[15px] font-semibold leading-6 text-[#2C1810]">{TOPIC_LABELS[topicKey]}</p>
+                        </div>
+
+                        <div className="flex flex-wrap justify-end gap-2">
+                          {ZODIAC_INFO[zodiacModalOpen].topicRecommendations[topicKey].map((mukhi) => {
+                            const mukhiKey = String(mukhi || "").replace(/\D/g, "");
+                            const hasTarget = mukhiToProductId.has(mukhiKey);
+
+                            return (
+                              <button
+                                key={`${topicKey}-${mukhi}`}
+                                type="button"
+                                onClick={() => handleMukhiClick(mukhi)}
+                                disabled={!hasTarget}
+                                className="rounded-full border border-[#F1C790] bg-white px-3 py-1 text-xs font-bold text-[#6B3410] transition hover:bg-[#fff4e4] disabled:cursor-not-allowed disabled:opacity-60"
+                                title={hasTarget ? `Open ${mukhi}` : "Product unavailable"}
+                              >
+                                {mukhi}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
 
               {/* Info Box */}
-              <div className="rounded-xl bg-[#fff7eb] p-4">
+              <div className="rounded-xl border border-[#F4D5AF] bg-[#fff7eb] p-4">
                 <p className="text-sm text-[#4A3728]">
                   {ZODIAC_INFO[zodiacModalOpen].title}s can benefit from the recommended Mukhi combinations
                   to enhance focus on these key life areas.

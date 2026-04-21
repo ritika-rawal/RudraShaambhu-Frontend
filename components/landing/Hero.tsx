@@ -15,7 +15,7 @@ export default function Hero() {
             <p className="text-lg leading-relaxed" style={{ color: colors.text }}>
               We believe spiritual tools should be chosen with care, not impulse. That's why every Rudraksha Rudra Shambhu offer is guided, verified, and handled with intention.
             </p>
-            <Link href="/explore">
+            <Link href="/rudraksha">
               <button
                 className="px-8 py-4 rounded-lg font-semibold text-lg transition-all hover:scale-105 active:scale-95"
                 style={{ backgroundColor: colors.cta, color: colors.text }}

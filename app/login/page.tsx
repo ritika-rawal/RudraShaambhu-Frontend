@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { getProviders, signIn } from "next-auth/react";
+import { getProviders, signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Footer from "@/components/common/Footer";
 import Header from "@/components/common/Header";
@@ -10,6 +10,7 @@ import Header from "@/components/common/Header";
 export default function LoginPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { status } = useSession();
   const [loadingProvider, setLoadingProvider] = useState<"google" | "apple" | "guest" | null>(null);
   const [hasGoogle, setHasGoogle] = useState(false);
   const [hasApple, setHasApple] = useState(false);
@@ -19,6 +20,7 @@ export default function LoginPage() {
   const [guestError, setGuestError] = useState<string | null>(null);
   const authError = searchParams.get("error");
   const callbackUrl = searchParams.get("callbackUrl") || "/rudraksha";
+  const forceLogin = searchParams.get("forceLogin") === "1";
 
   const authErrorMessage = useMemo(() => {
     if (!authError) {
@@ -71,6 +73,12 @@ export default function LoginPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (status === "authenticated" && !forceLogin) {
+      router.replace(callbackUrl);
+    }
+  }, [status, callbackUrl, forceLogin, router]);
+
   async function handleLogin(provider: "google" | "apple") {
     setLoadingProvider(provider);
     await signIn(provider, { callbackUrl });
@@ -96,7 +104,7 @@ export default function LoginPage() {
 
     setLoadingProvider("guest");
     const response = await signIn("credentials", {
-      redirect: false,
+      callbackUrl,
       name,
       email
     });
@@ -106,9 +114,6 @@ export default function LoginPage() {
       setLoadingProvider(null);
       return;
     }
-
-    router.push(callbackUrl);
-    setLoadingProvider(null);
   }
 
   return (

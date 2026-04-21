@@ -15,8 +15,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sacred Rudraksha - Authentic Spiritual Beads",
+  title: "Rudra Shaambhu",
   description: "Discover authentic Rudraksha beads for meditation, spiritual growth, and inner peace. Transform your life with sacred traditions.",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({

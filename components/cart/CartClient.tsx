@@ -1,14 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Footer from "@/components/common/Footer";
 import Header from "@/components/common/Header";
 import { useCart } from "@/components/cart/CartProvider";
 import { useCurrency } from "@/components/common/CurrencyProvider";
 
 export default function CartClient() {
+  const router = useRouter();
   const { items, totalAmount, itemCount, removeItem, updateQuantity } = useCart();
   const { formatPrice } = useCurrency();
+
+  function handleCheckout() {
+    router.push("/login?callbackUrl=/checkout&forceLogin=1");
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FFE8C7] to-[#FFD8A8]">
@@ -83,9 +89,13 @@ export default function CartClient() {
                   <Link href="/rudraksha" className="rounded-xl bg-[#fff1df] px-4 py-2 text-sm font-semibold text-[#8B4513]">
                     Continue Shopping
                   </Link>
-                  <Link href="/login?callbackUrl=/checkout" className="rounded-xl bg-[#8B4513] px-4 py-2 text-sm font-semibold text-white">
+                  <button
+                    type="button"
+                    onClick={handleCheckout}
+                    className="rounded-xl bg-[#8B4513] px-4 py-2 text-sm font-semibold text-white"
+                  >
                     Proceed to Checkout
-                  </Link>
+                  </button>
                 </div>
               </div>
             </>

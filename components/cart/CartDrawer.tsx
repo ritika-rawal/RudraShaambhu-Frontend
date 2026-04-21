@@ -2,14 +2,21 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ShoppingBag, X } from "lucide-react";
 import { useCart } from "@/components/cart/CartProvider";
 import { useCurrency } from "@/components/common/CurrencyProvider";
 
 export default function CartDrawer() {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
   const { items, itemCount, totalAmount, removeItem, updateQuantity } = useCart();
   const { formatPrice } = useCurrency();
+
+  function handleCheckout() {
+    setOpen(false);
+    router.push("/login?callbackUrl=/checkout&forceLogin=1");
+  }
 
   return (
     <>
@@ -74,13 +81,13 @@ export default function CartDrawer() {
             <div className="absolute bottom-0 left-0 right-0 border-t bg-white p-5">
               <p className="text-sm text-[#4A3728]">Total</p>
               <p className="text-xl font-bold text-[#8B4513]">{formatPrice(totalAmount)}</p>
-              <Link
-                href="/login?callbackUrl=/checkout"
-                onClick={() => setOpen(false)}
-                className="mt-3 block rounded-xl bg-[#8B4513] py-2 text-center text-sm font-semibold text-white"
+              <button
+                type="button"
+                onClick={handleCheckout}
+                className="mt-3 block w-full rounded-xl bg-[#8B4513] py-2 text-center text-sm font-semibold text-white"
               >
                 Go to Checkout
-              </Link>
+              </button>
             </div>
           </aside>
         </div>

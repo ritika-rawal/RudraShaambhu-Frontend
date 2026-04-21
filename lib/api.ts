@@ -77,6 +77,18 @@ export async function fetchProductById(productId: string) {
   return request<{ item: RudrakshaProduct }>(`/products/${encodeURIComponent(productId)}`);
 }
 
+export async function updateProductPriceAsAdmin(payload: {
+  adminEmail: string;
+  productId?: string;
+  mukhi?: string;
+  price: number;
+}) {
+  return request<{ item: RudrakshaProduct }>("/products/admin/price", {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+}
+
 export async function fetchNameRecommendations(name: string) {
   return request<RecommendationResponse>(
     `/recommend/name?name=${encodeURIComponent(name)}`
@@ -172,6 +184,45 @@ export type OrderResponse = {
   };
 };
 
+export type AdminOrder = {
+  _id: string;
+  userId:
+    | string
+    | {
+        _id?: string;
+        name?: string;
+        email?: string;
+        image?: string;
+        provider?: string;
+        createdAt?: string;
+      };
+  totalAmount: number;
+  shippingAddress: string;
+  shipping?: {
+    fullName?: string;
+    phone?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
+  status: "pending" | "completed";
+  createdAt: string;
+  items?: {
+    productId?: {
+      _id?: string;
+      id?: string | number;
+      name?: string;
+      mukhi?: string | number;
+      price?: number;
+    };
+    quantity: number;
+    price: number;
+  }[];
+};
+
 export async function createOrder(payload: { userId: string; shippingAddress: string }) {
   return request<OrderResponse>("/order/create", {
     method: "POST",
@@ -202,4 +253,9 @@ export async function createOrderFromItems(payload: {
 
 export async function fetchOrders(userId: string) {
   return request<{ orders: OrderResponse["order"][] }>(`/order/${userId}`);
+}
+
+export async function fetchAdminOrders(adminEmail: string) {
+  const query = `?adminEmail=${encodeURIComponent(adminEmail)}`;
+  return request<{ orders: AdminOrder[] }>(`/order/admin/all${query}`);
 }

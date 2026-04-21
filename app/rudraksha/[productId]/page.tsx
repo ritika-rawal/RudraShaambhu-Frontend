@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import { useCart } from "@/components/cart/CartProvider";
@@ -123,6 +124,8 @@ function getRudrakshaInsight(product: RudrakshaProduct): RudrakshaInsight {
 }
 
 export default function RudrakshaProductPage() {
+  const router = useRouter();
+  const { status } = useSession();
   const { addItem } = useCart();
   const { formatPrice } = useCurrency();
   const params = useParams<{ productId?: string }>();
@@ -183,6 +186,11 @@ export default function RudrakshaProductPage() {
 
   async function handleAddToCart() {
     if (!product) {
+      return;
+    }
+
+    if (status !== "authenticated") {
+      router.push("/login?callbackUrl=/checkout");
       return;
     }
 
