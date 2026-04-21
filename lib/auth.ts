@@ -6,7 +6,7 @@ import GoogleProvider from "next-auth/providers/google";
 const API_BASE_URL =
   process.env.BACKEND_API_BASE_URL ||
   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "http://localhost:5000/api";
+  "https://rudrashaambhu-backend-1.onrender.com/api";
 
 function sanitizeEnv(value: string | undefined) {
   return String(value || "").trim().replace(/^['\"]|['\"]$/g, "");
